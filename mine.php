@@ -10,6 +10,8 @@
 <body>
 <button style="margin-left:15%; margin-top:20%; position:relative; z-index:10000; width:200px; height:40px;">Stahp</button>
 <div id="assets">
+	<?= file_get_contents('battery.svg'); ?>
+	<?= file_get_contents('commuter.svg'); ?>
 	<?= file_get_contents('coil.svg'); ?>
 </div>
 <script>
@@ -54,14 +56,27 @@
 
 	// Coil --------------------------------------------
 	/*var easing = 0.125;
-	var coil = two.interpret($('svg')[0]).center();
+	var coil = two.interpret($('svg.coil')[0]).center();
 	coil.visible = true;
 	coil.scale = .5;*/
 
-	// Create electrong group
+	// Create electron group
 	var electrones = new Two.Group();
 	electrones.add(electrons);
 	two.add(electrones); // Add to scene
+
+
+	// Battery
+	var battery = two.interpret($('svg.battery')[0]);
+	battery.visible = true;
+	battery.scale = .6;
+	battery.translation.set(-15, 85);
+
+	// Commuter
+	var commuter = two.interpret($('svg.commuter')[0]);
+	commuter.visible = true;
+	commuter.scale = .6;
+	commuter.translation.set(-30, -110);
 
 
 	two.bind('update', function(frameCount){
@@ -75,8 +90,8 @@
 	//				Electron flow
 	//	-----------------------------------
 		var e;
-		
-		for(var i=0; i<electrons.length; i++){
+
+		for(var i = 0; i<electrons.length; i++){
 
 			e = electrons[i];
 
