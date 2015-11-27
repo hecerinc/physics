@@ -105,6 +105,17 @@
 	coil.scale = .7;
 	coil.translation.set(50, -96);
 
+	// var coilPath = new Two.Ellipse(0, 0, 270, 115);
+	// coilPath.noFill().stroke = "#000";
+	// coilPath.scale = .5;
+	// coilPath.translation.set(50, -95);
+	// two.add(coilPath);
+
+	// Coil electron
+	var coilElectron =  two.makeCircle(0,0,5);
+	coilElectron.noStroke().fill = "#fff800";
+	coilElectron.translation.set(175, -185);
+	
 	// Commuter
 	var commuter = two.interpret($('svg.commuter')[0]);
 	commuter.visible = true;
@@ -115,19 +126,12 @@
 	var comLine = two.makeRectangle(50,-40, 104, 8);
 	comLine.noStroke().fill = "#fff";
 
-	// Coil electron
-	var coilElectron =  two.makeCircle(0,0,5);
-	coilElectron.noStroke().fill = "#fff800";
-	coilElectron.translation.set(175, -45);
 
-	var coilPath = new Two.Ellipse(0, 0, 270, 115);
-	coilPath.noFill().stroke = "#000";
-	coilPath.scale = .5;
-	coilPath.translation.set(50, -95);
-	two.add(coilPath);
+	
 
 	var defaultSpeed = .09;
 	var electronSpeed = 1;
+	var right = true, a = 1;
 	two.bind('update', function(frameCount){
 		// return;
 		// var number = frameCount;
@@ -175,11 +179,20 @@
 		// console.log(coilElectron.translation.x);
 		//-76.29836250018285
 		// 175.0078461006153
-		if(frameCount%160> 0 && frameCount%160  <= 80)
-			coilElectron.translation.y =  Math.sqrt(Math.pow(125.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2));
-			// coilElectron.translation.y = Math.pow(.5*coilElectron.translation.x - 20, 2)/100 - 130;
-		else
-			coilElectron.translation.y =  - Math.sqrt(Math.pow(125.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2));
+		if(coilElectron.translation.x >= 175.0078461006153)
+			right = true;
+		if(coilElectron.translation.x <= -76.29836250018285)
+			right = false;
+		a = right? -1 : 1;
+		coilElectron.translation.y =  a*.4*Math.sqrt(Math.pow(126.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2)) - 100;
+		// coilElectron.translation.y = Math.pow(.5*coilElectron.translation.x - 20, 2)/100 - 130;
+		// console.log(coilElectron.translation.y);
+		if(isNaN(coilElectron.translation.y)){
+			console.log(coilElectron.translation.x);
+			console.log(frameCount);
+			two.pause();
+		}
+
 			// coilElectron.translation.y = - Math.pow(.5*coilElectron.translation.x - 15, 2)/100 - 40;
 		
 		// coilElectron.translation.y += 2*Math.sin(1*(-frameCount/(Math.PI*8)));
