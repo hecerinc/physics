@@ -5,13 +5,28 @@
 	<title>SVG Twojs</title>
 	<script src="jquery.js"></script>
 	<script src="two.min.js"></script>
-	<style>#assets{display: none;}</style>
+	<style>
+		#assets{display: none;}
+		button{
+			margin-left: 15%;
+			margin-top: 10%;
+			position: relative;
+			z-index:10000;
+			width: 200px;
+			height: 40px;
+		}
+		.faster{margin-left: 0;}
+	</style>
 </head>
 <body>
-<button style="margin-left:15%; margin-top:20%; position:relative; z-index:10000; width:200px; height:40px;">Stahp</button>
+<button class="stop">Stahp</button>
+<!-- <button class="start">Play!</button> -->
+<button class="faster">Go faster!</button>
 <div id="assets">
 	<?= file_get_contents('battery.svg'); ?>
 	<?= file_get_contents('commuter.svg'); ?>
+	<?= file_get_contents('leftmagnet.svg'); ?>
+	<?= file_get_contents('rightmagnet.svg'); ?>
 	<?= file_get_contents('coil.svg'); ?>
 </div>
 <script>
@@ -19,7 +34,7 @@
 	var two = new Two({
 		type: Two.Types['svg'],
 		fullscreen: true,
-		autostart: true
+		autostart: false
 	}).appendTo(document.body);
 	
 	// Path del electron
@@ -54,12 +69,10 @@
 		[-20,8]
 	];*/
 
-	// Coil --------------------------------------------
-	/*var easing = 0.125;
-	var coil = two.interpret($('svg.coil')[0]).center();
-	coil.visible = true;
-	coil.scale = .5;*/
+	var easing = 0.125;
 
+
+	
 	// Create electron group
 	var electrones = new Two.Group();
 	electrones.add(electrons);
@@ -72,12 +85,39 @@
 	battery.scale = .6;
 	battery.translation.set(-15, 85);
 
+	
+
+	// Left magnet
+	var leftMagnet = two.interpret($('svg.leftmagnet')[0]);
+	leftMagnet.visible = true;
+	leftMagnet.scale = .7;
+	leftMagnet.translation.set(-460, -200);
+
+	// Right magnet
+	var rightMagnet = two.interpret($('svg.rightmagnet')[0]);
+	rightMagnet.visible = true;
+	rightMagnet.scale = .7;
+	rightMagnet.translation.set(140, -200);
+
+	// Coil 
+	var coil = two.interpret($('svg.coil')[0]).center();
+	coil.visible = true;
+	coil.scale = .7;
+	coil.translation.set(50, -96);
+
 	// Commuter
 	var commuter = two.interpret($('svg.commuter')[0]);
 	commuter.visible = true;
 	commuter.scale = .6;
 	commuter.translation.set(-30, -110);
 
+	// linea del commuter
+	var comLine = two.makeRectangle(50,-40, 104, 8);
+	comLine.noStroke().fill = "#fff";
+
+
+
+	var defaultSpeed = .09;
 
 	two.bind('update', function(frameCount){
 		// return;
@@ -120,16 +160,25 @@
 			}
 		}
 
-		// coil.rotation += 0.9;
+		coil.rotation += defaultSpeed;
+		comLine.rotation += defaultSpeed;
 
 	}).play();
 
 
 	$(function(){
-		$('button').click(function(e){
-			e.preventDefault();
+		$('button.stop').click(function(){
 			console.log("Stahp");
 			two.pause();
+		});
+		$('button.start').click(function(){
+			console.log('Play :)');
+			two.play();
+		});
+		$('button.faster').click(function(){
+			console.log('Faster!');
+			defaultSpeed = .9;
+			$(this).prop('disabled', true);
 		});
 	});
 </script>
