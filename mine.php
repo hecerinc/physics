@@ -118,7 +118,7 @@
 
 
 	var defaultSpeed = .09;
-
+	var electronSpeed = 1;
 	two.bind('update', function(frameCount){
 		// return;
 		// var number = frameCount;
@@ -130,7 +130,6 @@
 	//				Electron flow
 	//	-----------------------------------
 		var e;
-
 		for(var i = 0; i<electrons.length; i++){
 
 			e = electrons[i];
@@ -138,35 +137,36 @@
 			// -------->
 			if(e.translation.y == -40){
 				if(e.translation.x != 150)
-					e.translation.x += 2;
+					e.translation.x += 2*electronSpeed;
 				else{
-					e.translation.x += 1;
-					e.translation.y += 4;
+					e.translation.x += 1*electronSpeed;
+					e.translation.y += 4*electronSpeed;
 				}
 			}
 			// <---------
 			else if(e.translation.y >= 120 && e.translation.x != -90){
-				e.translation.x -= 2;
+				e.translation.x -= 2*electronSpeed;
 			}
 			// down
 			else if(e.translation.x >= 150 && e.translation.x <= 190 && e.translation.y < 120){
-				e.translation.x += 1;
-				e.translation.y += 4;
+				e.translation.x += 1*electronSpeed;
+				e.translation.y += 4*electronSpeed;
 			}
 			// up
 			else if(e.translation.y > -40 && e.translation.x >= -90 && e.translation.x <= -50){
-				e.translation.x += 1;
-				e.translation.y -= 4;
+				e.translation.x += 1*electronSpeed;
+				e.translation.y -= 4*electronSpeed;
 			}
 		}
 
-		coil.rotation += defaultSpeed;
+		// coil.rotation += defaultSpeed;
 		comLine.rotation += defaultSpeed;
 
 	}).play();
 
 
 	$(function(){
+		$('button.faster').prop('disabled', false);
 		$('button.stop').click(function(){
 			console.log("Stahp");
 			two.pause();
@@ -178,6 +178,7 @@
 		$('button.faster').click(function(){
 			console.log('Faster!');
 			defaultSpeed = .9;
+			electronSpeed = 2;
 			$(this).prop('disabled', true);
 		});
 	});
