@@ -115,7 +115,16 @@
 	var comLine = two.makeRectangle(50,-40, 104, 8);
 	comLine.noStroke().fill = "#fff";
 
+	// Coil electron
+	var coilElectron =  two.makeCircle(0,0,5);
+	coilElectron.noStroke().fill = "#fff800";
+	coilElectron.translation.set(175, -45);
 
+	var coilPath = new Two.Ellipse(0, 0, 270, 115);
+	coilPath.noFill().stroke = "#000";
+	coilPath.scale = .5;
+	coilPath.translation.set(50, -95);
+	two.add(coilPath);
 
 	var defaultSpeed = .09;
 	var electronSpeed = 1;
@@ -131,7 +140,7 @@
 	//	-----------------------------------
 		var e;
 		for(var i = 0; i<electrons.length; i++){
-
+			break;
 			e = electrons[i];
 
 			// -------->
@@ -160,11 +169,28 @@
 		}
 
 		// coil.rotation += defaultSpeed;
-		comLine.rotation += defaultSpeed;
-
+		// comLine.rotation += defaultSpeed;
+		// coilElectron.translation.x = frameCount%5;
+		coilElectron.translation.x += 5*Math.sin(-frameCount/(Math.PI * 8));
+		// console.log(coilElectron.translation.x);
+		//-76.29836250018285
+		// 175.0078461006153
+		if(frameCount%160> 0 && frameCount%160  <= 80)
+			coilElectron.translation.y =  Math.sqrt(Math.pow(125.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2));
+			// coilElectron.translation.y = Math.pow(.5*coilElectron.translation.x - 20, 2)/100 - 130;
+		else
+			coilElectron.translation.y =  - Math.sqrt(Math.pow(125.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2));
+			// coilElectron.translation.y = - Math.pow(.5*coilElectron.translation.x - 15, 2)/100 - 40;
+		
+		// coilElectron.translation.y += 2*Math.sin(1*(-frameCount/(Math.PI*8)));
 	}).play();
-
-
+	// two.update();
+	// function drag(e){
+	// 	var pct = e.clientX / two.width;
+	// 	coilPath.getPointAt(pct, coilElectron.translation);
+	// 	coilElectron.translation.addSelf(coilPath.translation);
+	// }
+	// $(window).bind('mousemove', drag);
 	$(function(){
 		$('button.faster').prop('disabled', false);
 		$('button.stop').click(function(){
