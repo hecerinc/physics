@@ -7,36 +7,64 @@
 	<script src="two.min.js"></script>
 	<style>
 		#assets{display: none;}
+		body{
+			font-family:'Open Sans', sans-serif;
+		}
 		button{
-			margin-left: 15%;
-			margin-top: 10%;
+			/*margin-left: 15%;*/
+			/*margin-top: 10%;*/
 			position: relative;
 			z-index:10000;
-			width: 200px;
+			width: 150px;
 			height: 40px;
 		}
 		.faster{margin-left: 0;}
+		.clear {
+			clear: both;
+			display: block;
+			overflow: hidden;
+			visibility: hidden;
+			width: 0;
+			height: 0;
+		}
+		.container{
+			margin: 0 auto;
+			width: 80%;
+		}
+		.controls{
+			width: 60%;
+			margin: 0 auto;
+		}
 	</style>
 </head>
 <body>
-<button class="stop">Stahp</button>
-<!-- <button class="start">Play!</button> -->
-<button class="faster">Go faster!</button>
-<div id="assets">
-	<?= file_get_contents('battery.svg'); ?>
-	<?= file_get_contents('commuter.svg'); ?>
-	<?= file_get_contents('leftmagnet.svg'); ?>
-	<?= file_get_contents('rightmagnet.svg'); ?>
-	<?= file_get_contents('coil.svg'); ?>
+<div class="container">
+	<div id="assets">
+		<?= file_get_contents('battery.svg'); ?>
+		<?= file_get_contents('commuter.svg'); ?>
+		<?= file_get_contents('leftmagnet.svg'); ?>
+		<?= file_get_contents('rightmagnet.svg'); ?>
+		<?= file_get_contents('coil.svg'); ?>
+	</div>
+</div>
+<div class="clear"></div>
+<div class="controls">
+
+	<button class="start">Play</button>
+	<button class="stop">Pausa</button>
+	<button class="faster">Aumentar velocidad</button>
+	<label><input type="checkbox" name="" id="coilRotation"> Rotaci&oacute;n del solenoide</label>
+	<label><input type="checkbox" name="" id="fieldLines"> L&iacute;neas de campo</label>
 </div>
 <script>
 
 	var two = new Two({
 		type: Two.Types['svg'],
-		fullscreen: true,
+		fullscreen: false,
+		width:1100,
 		autostart: false
-	}).appendTo(document.body);
-	
+	}).appendTo($('.container')[0]);
+	var coilRotation = false;
 	// Path del electron
 	var path = two.makePath(0,0,100,0,120,80,-20,80, false);
 	path.scale = 2;
@@ -99,11 +127,71 @@
 	rightMagnet.scale = .7;
 	rightMagnet.translation.set(140, -200);
 
+
 	// Coil 
 	var coil = two.interpret($('svg.coil')[0]).center();
 	coil.visible = true;
 	coil.scale = .7;
 	coil.translation.set(50, -96);
+
+	// Arrow
+	// var arrowHead = two.makePath(,false);
+
+	var arrowsArray = [];
+
+	var arrowHead = new Two.Path([new Two.Anchor(0,0), new Two.Anchor(-2,-2), new Two.Anchor(0,-4)], false);
+	arrowHead.scale = 3;
+	arrowHead.fill = '#000';
+	arrowHead.linewidth = .5;
+	arrowHead.translation.y = 5;
+	var arrowLine = new Two.Line(0,0,40,0);
+	arrowLine.linewidth = 2;
+	var arrow = new Two.Group(arrowHead, arrowLine);
+	two.add(arrowHead, arrowLine);
+	var instance, instancia;
+	// arrow.translation.x += 2000;
+	var arrowsGroup  = new Two.Group();
+	for (var i = 1; i < 10; i++) {
+		instance = arrowHead.clone();
+		instancia = arrowLine.clone();
+		// instance.translation.y += i*20;
+		// instancia.translation.y += i*20;
+		var arrowGroup = two.makeGroup(instance, instancia);
+		arrowsArray.push(arrowGroup);
+		arrowsGroup.add(arrowGroup);
+	}
+	// arrowsGroup.add(arrow);
+	two.add(arrowsGroup);
+	arrowLine.visible = arrowHead.visible = false;
+	var deltax = 0, deltay = 0;
+	var it = 0;
+	var deltas = [58.246571850031614, 15.592192579060793, 149.52321810415015, 76.16956746205688, 100.490913761314, 22.970735805574805, 165.06488729501143, 72.58823714219034, 188.2410985417664];
+	_.map(arrowsArray, function(arrow){
+		if(delta < 25){
+			arrow.translation.x += deltax;
+			arrow.translation.y -= deltay;
+
+		}
+		if(delta >= 25 && delta < 50){
+			arrow.translation.x += deltax;
+			arrow.translation.y += deltay;
+		}
+		else if(delta >= 50 && delta <= 75){
+			arrow.translation.x -= deltax;
+			arrow.translation.y += deltay;
+		}
+		else{
+			arrow.translation.x -= deltax;
+			arrow.translation.y -= deltay;
+		}
+		deltax += 25;
+		// deltay += 150*Math.pow(-1, it)*Math.random();
+		deltay = deltas[it];
+		deltas.push(deltay);
+		it++;
+	});
+	arrowsGroup.translation.x += 130;
+
 
 	// var coilPath = new Two.Ellipse(0, 0, 270, 115);
 	// coilPath.noFill().stroke = "#000";
@@ -126,8 +214,10 @@
 	var comLine = two.makeRectangle(50,-40, 104, 8);
 	comLine.noStroke().fill = "#fff";
 
-
 	
+
+	// console.log(deltas);
+	arrowsGroup.visible = false;
 
 	var defaultSpeed = .09;
 	var electronSpeed = 1;
@@ -144,7 +234,7 @@
 	//	-----------------------------------
 		var e;
 		for(var i = 0; i<electrons.length; i++){
-			break;
+			// break;
 			e = electrons[i];
 
 			// -------->
@@ -172,30 +262,39 @@
 			}
 		}
 
-		// coil.rotation += defaultSpeed;
-		// comLine.rotation += defaultSpeed;
-		// coilElectron.translation.x = frameCount%5;
-		coilElectron.translation.x += 5*Math.sin(-frameCount/(Math.PI * 8));
-		// console.log(coilElectron.translation.x);
-		//-76.29836250018285
-		// 175.0078461006153
-		if(coilElectron.translation.x >= 175.0078461006153)
-			right = true;
-		if(coilElectron.translation.x <= -76.29836250018285)
-			right = false;
-		a = right? -1 : 1;
-		coilElectron.translation.y =  a*.4*Math.sqrt(Math.pow(126.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2)) - 100;
-		// coilElectron.translation.y = Math.pow(.5*coilElectron.translation.x - 20, 2)/100 - 130;
-		// console.log(coilElectron.translation.y);
-		if(isNaN(coilElectron.translation.y)){
-			console.log(coilElectron.translation.x);
-			console.log(frameCount);
-			two.pause();
+
+		// Coil electron animation
+		if(!coilRotation){
+			coilElectron.translation.x += 5*Math.sin(-frameCount/(Math.PI * 8));
+			//-76.29836250018285
+			// 175.0078461006153
+			if(coilElectron.translation.x >= 175.0078461006153)
+				right = true;
+			if(coilElectron.translation.x <= -76.29836250018285)
+				right = false;
+			a = right? 1 : -1;
+			coilElectron.translation.y =  a*.4*Math.sqrt(Math.pow(126.65,2) - Math.pow(coilElectron.translation.x - 49.65, 2)) - 100;
+			// if(isNaN(coilElectron.translation.y)){
+			// 	console.log(coilElectron.translation.x);
+			// 	console.log(frameCount);
+			// 	two.pause();
+			// }
 		}
 
-			// coilElectron.translation.y = - Math.pow(.5*coilElectron.translation.x - 15, 2)/100 - 40;
-		
-		// coilElectron.translation.y += 2*Math.sin(1*(-frameCount/(Math.PI*8)));
+		// Arrows
+		var timeSpan = 60;
+		if(frameCount%timeSpan == 0){
+			arrowsGroup.translation.x += timeSpan/2;
+			arrowsGroup.opacity = 1;
+		}
+		if(frameCount%timeSpan > 0){
+			arrowsGroup.opacity -= .016;
+			arrowsGroup.translation.x -= .5;
+		}
+		if(coilRotation){		
+			comLine.rotation += defaultSpeed;
+			coil.rotation += defaultSpeed;
+		}
 	}).play();
 	// two.update();
 	// function drag(e){
@@ -219,6 +318,16 @@
 			defaultSpeed = .9;
 			electronSpeed = 2;
 			$(this).prop('disabled', true);
+		});
+		$('#coilRotation').change(function(){
+			coilRotation = !coilRotation;
+			coilElectron.visible = !coilElectron.visible;
+		});
+		$('#fieldLines').change(function(){
+			if(this.checked){
+				arrowsGroup.visible = true;
+			}
+			else arrowsGroup.visible = false;
 		});
 	});
 </script>
